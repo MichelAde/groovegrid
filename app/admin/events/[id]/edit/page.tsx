@@ -144,7 +144,7 @@ export default function EditEventPage() {
 
       // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
-        .from('public')
+        .from('event-images')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
@@ -154,7 +154,7 @@ export default function EditEventPage() {
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('public')
+        .from('event-images')
         .getPublicUrl(filePath);
 
       setImageUrl(publicUrl);
