@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         .eq('organization_id', campaign.organization_id)
         .eq('status', 'confirmed');
 
-      recipients = [...new Set(orders?.map(o => o.buyer_email) || [])];
+      recipients = Array.from(new Set(orders?.map(o => o.buyer_email) || []));
     } else {
       // Get all customers
       const { data: orders } = await supabase
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
         .eq('organization_id', campaign.organization_id)
         .eq('status', 'confirmed');
 
-      recipients = [...new Set(orders?.map(o => o.buyer_email) || [])];
+      recipients = Array.from(new Set(orders?.map(o => o.buyer_email) || []));
     }
 
     console.log(`Sending campaign to ${recipients.length} recipients`);
