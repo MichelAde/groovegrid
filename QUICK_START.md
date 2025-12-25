@@ -31,7 +31,21 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 npm run dev
 ```
 
-### Step 3: Load Your Data (2 minutes)
+### Step 3: Fix Schema Issues (1 minute)
+
+**IMPORTANT: Run this BEFORE loading data!**
+
+1. Go to Supabase SQL Editor
+2. Open file: `supabase-pre-flight-fixes.sql`
+3. Copy and paste entire content
+4. Click "Run"
+5. Should see: "✅ Schema fixes applied successfully!"
+
+**What this fixes:**
+- Adds `sort_order` column to pass_types
+- Allows NULL credits in class_packages (for unlimited packages)
+
+### Step 4: Load Your Data (2 minutes)
 
 1. Get your user ID:
    - Go to Supabase → Authentication → Users
@@ -47,7 +61,7 @@ npm run dev
    - Paste the ENTIRE script
    - Click "Run"
 
-### Step 4: Verify (30 seconds)
+### Step 5: Verify (30 seconds)
 
 Visit these URLs:
 - http://localhost:3000/admin/events (should see 8 events)

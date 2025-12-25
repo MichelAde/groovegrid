@@ -36,7 +36,27 @@ SELECT id, email FROM auth.users WHERE email = 'michel.adedokun@outlook.com';
 
 ---
 
-## 🔧 Step 2: Update the SQL Script
+## 🔧 Step 2: Fix Schema Issues (IMPORTANT!)
+
+Before loading data, we need to fix two schema issues:
+
+1. **Go to Supabase SQL Editor:**
+   - https://supabase.com/dashboard/project/bmdzerzampxetxmpmihv/sql
+
+2. **Run Pre-Flight Fixes:**
+   - Open file: `supabase-pre-flight-fixes.sql`
+   - Copy **ALL content**
+   - Paste into SQL Editor
+   - Click **"Run"**
+   - Should see: "✅ Schema fixes applied successfully!"
+
+**What this fixes:**
+- ✅ Adds `sort_order` column to `pass_types` table
+- ✅ Allows NULL `credits` in `class_packages` table (for unlimited packages)
+
+---
+
+## 📝 Step 3: Update the SQL Script
 
 1. Open the file: `load-mikilele-data.sql`
 2. Find line 33 (search for `'YOUR_USER_ID'`)
@@ -52,7 +72,7 @@ SELECT id, email FROM auth.users WHERE email = 'michel.adedokun@outlook.com';
 
 ---
 
-## 🎬 Step 3: Run the SQL Script
+## 🎬 Step 4: Run the SQL Script
 
 1. **Go to Supabase SQL Editor:**
    - https://supabase.com/dashboard/project/bmdzerzampxetxmpmihv/sql
@@ -81,7 +101,7 @@ SELECT id, email FROM auth.users WHERE email = 'michel.adedokun@outlook.com';
 
 ---
 
-## ✅ Step 4: Verify Data in Your App
+## ✅ Step 5: Verify Data in Your App
 
 ### Test Events:
 
@@ -127,7 +147,7 @@ SELECT id, email FROM auth.users WHERE email = 'michel.adedokun@outlook.com';
 
 ---
 
-## 🎨 Step 5: Add Event Images (Optional)
+## 🎨 Step 6: Add Event Images (Optional)
 
 Your events are now loaded, but they don't have poster images yet. You can add them:
 

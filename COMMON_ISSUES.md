@@ -242,6 +242,44 @@ USING (organization_id IN (
 
 ---
 
+## Issue 7: NULL Value Constraint Violations
+
+### **Symptoms:**
+- Error: `ERROR: 23502: null value in column "credits" of relation "class_packages" violates not-null constraint`
+- Error: `ERROR: 42703: column "sort_order" of relation "pass_types" does not exist`
+- Happens when running `load-mikilele-data.sql`
+
+### **Root Cause:**
+Schema issues where the database structure doesn't match what the application expects:
+1. `pass_types` table missing `sort_order` column
+2. `class_packages` table has `credits` as NOT NULL, but unlimited packages need NULL
+
+### **Fix:**
+
+**Quick Fix: Run Pre-Flight Script** (Recommended)
+
+1. Open Supabase SQL Editor
+2. Run entire file: `supabase-pre-flight-fixes.sql`
+3. This fixes both issues at once!
+
+**Or Manual Fix:**
+
+```sql
+-- Fix 1: Add sort_order column
+ALTER TABLE pass_types 
+ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
+
+-- Fix 2: Allow NULL credits
+ALTER TABLE class_packages 
+ALTER COLUMN credits DROP NOT NULL;
+```
+
+**Then:**
+- Run `load-mikilele-data.sql`
+- Should work perfectly! ✅
+
+---
+
 ## Quick Diagnostics
 
 ### Test Supabase Connection:
