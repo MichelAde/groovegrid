@@ -34,22 +34,30 @@ export default function OrganizationSwitcher({ currentOrgId }: OrganizationSwitc
       if (!user) return;
 
       // Get user's organizations
-      const { data: memberships, error } = await supabase
+      const { data: memberships, error: membershipsError } = await supabase
         .from('organization_members')
-        .select('organization_id, organization(*)')
+        .select('organization_id')
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (membershipsError) throw membershipsError;
 
-      const orgs = memberships?.map((m: any) => m.organization) || [];
-      setOrganizations(orgs);
+      // Fetch organization details
+      const orgIds = memberships?.map((m) => m.organization_id) || [];
+      const { data: orgs, error: orgsError } = await supabase
+        .from('organization')
+        .select('*')
+        .in('id', orgIds);
+
+      if (orgsError) throw orgsError;
+
+      setOrganizations(orgs || []);
 
       // Set current organization
       if (currentOrgId) {
-        const current = orgs.find((o: Organization) => o.id === currentOrgId);
-        setCurrentOrg(current || orgs[0] || null);
+        const current = (orgs || []).find((o: Organization) => o.id === currentOrgId);
+        setCurrentOrg(current || (orgs || [])[0] || null);
       } else {
-        setCurrentOrg(orgs[0] || null);
+        setCurrentOrg((orgs || [])[0] || null);
       }
     } catch (error) {
       console.error('Error loading organizations:', error);

@@ -22,12 +22,17 @@ export default async function AdminDashboard() {
   // Get user's current organization
   const { data: memberships } = await supabase
     .from('organization_members')
-    .select('organization_id, organization(*)')
+    .select('organization_id')
     .eq('user_id', user?.id!)
     .limit(1)
     .single();
 
-  const organization = memberships?.organization;
+  // Fetch organization details separately
+  const { data: organization } = await supabase
+    .from('organization')
+    .select('*')
+    .eq('id', memberships?.organization_id || '')
+    .single();
 
   // Quick stats
   const [eventsCount, coursesCount, passesCount] = await Promise.all([
