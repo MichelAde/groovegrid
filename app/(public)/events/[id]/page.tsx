@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { Calendar, MapPin, Users, Minus, Plus, ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import { formatDateTime, formatCurrency } from '@/lib/utils';
-import { loadStripe } from '@/stripe/stripe-js';
 
 interface TicketType {
   id: string;
