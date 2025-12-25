@@ -114,7 +114,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }
 
     // Send confirmation email
-    await sendConfirmationEmail(order, items, buyerEmail, buyerName);
+    await sendConfirmationEmail(order, items, buyerEmail, buyerName || 'Customer');
 
     console.log('Order processing completed successfully');
   } catch (error) {
