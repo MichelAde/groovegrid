@@ -186,22 +186,51 @@ export default function CreateEventPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image">Event Image</Label>
-              <div className="flex items-center gap-4">
-                <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  disabled={uploading}
-                />
-                {uploading && <span className="text-sm text-gray-500">Uploading...</span>}
-              </div>
-              {imageUrl && (
-                <div className="mt-2">
-                  <img src={imageUrl} alt="Preview" className="w-full max-w-md h-48 object-cover rounded-md" />
+              <Label>Event Poster / Image</Label>
+              <div className="space-y-3">
+                {imageUrl && (
+                  <div className="relative w-full h-48 rounded-lg overflow-hidden border">
+                    <img 
+                      src={imageUrl} 
+                      alt="Event poster preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploading}
+                      className="hidden"
+                      id="image-upload-create"
+                    />
+                    <label htmlFor="image-upload-create">
+                      <Button
+                        type="button"
+                        onClick={() => document.getElementById('image-upload-create')?.click()}
+                        disabled={uploading}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        {uploading ? 'Uploading...' : 'Upload Image'}
+                      </Button>
+                    </label>
+                  </div>
+                  
+                  <Input
+                    placeholder="Or paste image URL"
+                    value={imageUrl || ''}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                  />
                 </div>
-              )}
+                <p className="text-xs text-gray-500">
+                  Upload an image or paste a URL. Max 5MB. Recommended: 1200x630px
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

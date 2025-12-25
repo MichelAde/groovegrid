@@ -1,0 +1,550 @@
+📊 MIKILELE EVENTS - REAL DATA FOR GROOVEGRID
+1. ORGANIZATION DATA
+json{
+  "organization": {
+    "name": "Mikilele Events",
+    "subdomain": "mikilele",
+    "email": "mikileleevents@gmail.com",
+    "phone": "647-766-2111",
+    "address": "1099 Maitland Avenue",
+    "city": "Ottawa",
+    "province": "Ontario",
+    "country": "Canada",
+    "brand_color": "#7C3AED",
+    "subscription_tier": "pro",
+    "description": "Semba & Kizomba dance school with integrated event ticketing and DJ booking services"
+  }
+}
+
+2. EVENTS DATA
+Based on the ticket types you showed me, here are the actual events:
+json{
+  "events": [
+    {
+      "title": "Mikilele SBK Soirée - January 2026",
+      "description": "Monthly Semba, Bacata & Kizomba social dance event featuring live DJ, dancing from 8 PM to midnight, and a welcoming atmosphere for all skill levels.",
+      "category": "Social Dance",
+      "start_datetime": "2026-01-17T20:00:00",
+      "end_datetime": "2026-01-18T00:00:00",
+      "venue_name": "TBD",
+      "address": "TBD",
+      "city": "Ottawa",
+      "province": "Ontario",
+      "country": "Canada",
+      "capacity": 100,
+      "status": "published",
+      "ticket_types": [
+        {
+          "name": "General Admission",
+          "description": "Standard entry to the event",
+          "price": 15.00,
+          "quantity_available": 70,
+          "quantity_sold": 1,
+          "is_active": true
+        },
+        {
+          "name": "Student/Senior",
+          "description": "Discounted rate for students and seniors with valid ID",
+          "price": 12.00,
+          "quantity_available": 20,
+          "quantity_sold": 0,
+          "is_active": true
+        },
+        {
+          "name": "Early Bird",
+          "description": "Limited early bird pricing - first 10 tickets",
+          "price": 12.00,
+          "quantity_available": 10,
+          "quantity_sold": 0,
+          "sale_end_date": "2026-01-10T23:59:59",
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "title": "Ambiance Mikilele - January 2026",
+      "description": "Special edition evening featuring guest DJs and extended dancing hours",
+      "category": "Special Event",
+      "start_datetime": "2026-01-24T20:00:00",
+      "end_datetime": "2026-01-25T01:00:00",
+      "venue_name": "TBD",
+      "city": "Ottawa",
+      "province": "Ontario",
+      "country": "Canada",
+      "capacity": 120,
+      "status": "published",
+      "ticket_types": [
+        {
+          "name": "General Admission",
+          "price": 15.00,
+          "quantity_available": 80,
+          "quantity_sold": 2,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "title": "Mikilele SBK Soirée - February 2026",
+      "description": "Monthly Semba, Bacata & Kizomba social dance event",
+      "category": "Social Dance",
+      "start_datetime": "2026-02-21T20:00:00",
+      "end_datetime": "2026-02-22T00:00:00",
+      "venue_name": "TBD",
+      "city": "Ottawa",
+      "province": "Ontario",
+      "country": "Canada",
+      "capacity": 100,
+      "status": "published",
+      "ticket_types": [
+        {
+          "name": "General Admission",
+          "price": 15.00,
+          "quantity_available": 70,
+          "is_active": true
+        },
+        {
+          "name": "Student/Senior",
+          "price": 12.00,
+          "quantity_available": 20,
+          "is_active": true
+        },
+        {
+          "name": "Early Bird",
+          "price": 12.00,
+          "quantity_available": 10,
+          "sale_end_date": "2026-02-14T23:59:59",
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "title": "Mikilele SBK Soirée - March 2026",
+      "description": "Monthly Semba, Bacata & Kizomba social dance event",
+      "category": "Social Dance",
+      "start_datetime": "2026-03-21T20:00:00",
+      "end_datetime": "2026-03-22T00:00:00",
+      "venue_name": "TBD",
+      "city": "Ottawa",
+      "province": "Ontario",
+      "country": "Canada",
+      "capacity": 100,
+      "status": "published",
+      "ticket_types": [
+        {
+          "name": "General Admission",
+          "price": 15.00,
+          "quantity_available": 70,
+          "is_active": true
+        },
+        {
+          "name": "Student/Senior",
+          "price": 12.00,
+          "quantity_available": 20,
+          "is_active": true
+        },
+        {
+          "name": "Early Bird",
+          "price": 12.00,
+          "quantity_available": 10,
+          "sale_end_date": "2026-03-14T23:59:59",
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "title": "Mikilele SBK Soirée - April 2026",
+      "description": "Monthly Semba, Bacata & Kizomba social dance event",
+      "category": "Social Dance",
+      "start_datetime": "2026-04-18T20:00:00",
+      "end_datetime": "2026-04-19T00:00:00",
+      "venue_name": "TBD",
+      "city": "Ottawa",
+      "province": "Ontario",
+      "country": "Canada",
+      "capacity": 100,
+      "status": "published",
+      "ticket_types": [
+        {
+          "name": "General Admission",
+          "price": 15.00,
+          "quantity_available": 70,
+          "is_active": true
+        },
+        {
+          "name": "Student/Senior",
+          "price": 12.00,
+          "quantity_available": 20,
+          "is_active": true
+        },
+        {
+          "name": "Early Bird",
+          "price": 12.00,
+          "quantity_available": 10,
+          "sale_end_date": "2026-04-11T23:59:59",
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "title": "Mikilele SBK Soirée - May 2026",
+      "description": "Monthly Semba, Bacata & Kizomba social dance event",
+      "category": "Social Dance",
+      "start_datetime": "2026-05-16T20:00:00",
+      "end_datetime": "2026-05-17T00:00:00",
+      "venue_name": "TBD",
+      "city": "Ottawa",
+      "province": "Ontario",
+      "country": "Canada",
+      "capacity": 100,
+      "status": "published",
+      "ticket_types": [
+        {
+          "name": "General Admission",
+          "price": 15.00,
+          "quantity_available": 70,
+          "is_active": true
+        },
+        {
+          "name": "Student/Senior",
+          "price": 12.00,
+          "quantity_available": 20,
+          "is_active": true
+        },
+        {
+          "name": "Early Bird",
+          "price": 12.00,
+          "quantity_available": 10,
+          "sale_end_date": "2026-05-09T23:59:59",
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "title": "Mikilele SBK Soirée - June 2026",
+      "description": "Monthly Semba, Bacata & Kizomba social dance event",
+      "category": "Social Dance",
+      "start_datetime": "2026-06-20T20:00:00",
+      "end_datetime": "2026-06-21T00:00:00",
+      "venue_name": "TBD",
+      "city": "Ottawa",
+      "province": "Ontario",
+      "country": "Canada",
+      "capacity": 100,
+      "status": "published",
+      "ticket_types": [
+        {
+          "name": "General Admission",
+          "price": 15.00,
+          "quantity_available": 70,
+          "is_active": true
+        },
+        {
+          "name": "Student/Senior",
+          "price": 12.00,
+          "quantity_available": 20,
+          "is_active": true
+        },
+        {
+          "name": "Early Bird",
+          "price": 12.00,
+          "quantity_available": 10,
+          "sale_end_date": "2026-06-13T23:59:59",
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "title": "Mikilele SBK Soirée - July 2026",
+      "description": "Monthly Semba, Bacata & Kizomba social dance event",
+      "category": "Social Dance",
+      "start_datetime": "2026-07-18T20:00:00",
+      "end_datetime": "2026-07-19T00:00:00",
+      "venue_name": "TBD",
+      "city": "Ottawa",
+      "province": "Ontario",
+      "country": "Canada",
+      "capacity": 100,
+      "status": "published",
+      "ticket_types": [
+        {
+          "name": "General Admission",
+          "price": 15.00,
+          "quantity_available": 70,
+          "is_active": true
+        },
+        {
+          "name": "Student/Senior",
+          "price": 12.00,
+          "quantity_available": 20,
+          "is_active": true
+        },
+        {
+          "name": "Early Bird",
+          "price": 12.00,
+          "quantity_available": 10,
+          "sale_end_date": "2026-07-11T23:59:59",
+          "is_active": true
+        }
+      ]
+    }
+  ]
+}
+
+3. PASS TYPES DATA
+json{
+  "pass_types": [
+    {
+      "name": "Monthly All-Access Pass",
+      "description": "Unlimited entry to all Mikilele SBK Soirée events for one month",
+      "type": "monthly",
+      "price": 45.00,
+      "credits_total": null,
+      "validity_days": 30,
+      "is_active": true
+    },
+    {
+      "name": "5-Event Pass",
+      "description": "Credit-based pass valid for any 5 Mikilele events",
+      "type": "multi-event",
+      "price": 60.00,
+      "credits_total": 5,
+      "validity_days": 180,
+      "is_active": true
+    },
+    {
+      "name": "10-Event Pass",
+      "description": "Best value! Credit-based pass valid for any 10 Mikilele events",
+      "type": "multi-event",
+      "price": 110.00,
+      "credits_total": 10,
+      "validity_days": 365,
+      "is_active": true
+    },
+    {
+      "name": "Single Event Pass",
+      "description": "One-time entry pass to any Mikilele event",
+      "type": "single-event",
+      "price": 15.00,
+      "credits_total": 1,
+      "validity_days": 90,
+      "is_active": true
+    }
+  ]
+}
+
+4. COURSES / CLASSES DATA
+json{
+  "courses": [
+    {
+      "title": "Semba Fundamentals - Beginner Level",
+      "description": "Learn the foundational steps and rhythms of Semba dance. This 8-week course covers basic footwork, partner connection, and musicality. Perfect for complete beginners!",
+      "instructor": "To Be Announced",
+      "level": "Beginner",
+      "duration_weeks": 8,
+      "start_date": "2026-01-15",
+      "end_date": "2026-03-05",
+      "schedule_days": ["Thursday"],
+      "schedule_time": "19:30:00",
+      "max_students": 20,
+      "price": 160.00,
+      "status": "published"
+    },
+    {
+      "title": "Kizomba Essentials - Beginner Level",
+      "description": "Discover the smooth and sensual world of Kizomba. This 6-week course introduces basic steps, body movement, and connection techniques essential for social dancing.",
+      "instructor": "To Be Announced",
+      "level": "Beginner",
+      "duration_weeks": 6,
+      "start_date": "2026-02-01",
+      "end_date": "2026-03-08",
+      "schedule_days": ["Sunday"],
+      "schedule_time": "15:00:00",
+      "max_students": 16,
+      "price": 120.00,
+      "status": "published"
+    },
+    {
+      "title": "Semba Intermediate Techniques",
+      "description": "Take your Semba to the next level! This course focuses on advanced footwork variations, styling, and complex partner work. Prerequisites: completion of beginner Semba course or instructor approval.",
+      "instructor": "To Be Announced",
+      "level": "Intermediate",
+      "duration_weeks": 8,
+      "start_date": "2026-03-12",
+      "end_date": "2026-04-30",
+      "schedule_days": ["Thursday"],
+      "schedule_time": "20:45:00",
+      "max_students": 16,
+      "price": 180.00,
+      "status": "published"
+    },
+    {
+      "title": "Kizomba Urban & Tarraxinha",
+      "description": "Explore the modern evolution of Kizomba with Urban Kiz and the intimate movements of Tarraxinha. This 6-week intensive course covers isolation, waves, and musicality.",
+      "instructor": "To Be Announced",
+      "level": "Intermediate",
+      "duration_weeks": 6,
+      "start_date": "2026-03-15",
+      "end_date": "2026-04-19",
+      "schedule_days": ["Sunday"],
+      "schedule_time": "16:30:00",
+      "max_students": 14,
+      "price": 140.00,
+      "status": "published"
+    },
+    {
+      "title": "Semba & Kizomba Intensive Workshop",
+      "description": "Full-day intensive workshop combining both Semba and Kizomba techniques. Includes morning session on Semba fundamentals and afternoon session on Kizomba connection and musicality. Lunch included!",
+      "instructor": "To Be Announced",
+      "level": "All Levels",
+      "duration_weeks": 1,
+      "start_date": "2026-02-14",
+      "end_date": "2026-02-14",
+      "schedule_days": ["Saturday"],
+      "schedule_time": "10:00:00",
+      "max_students": 30,
+      "price": 75.00,
+      "status": "published"
+    }
+  ]
+}
+
+5. CLASS PACKAGES DATA
+json{
+  "class_packages": [
+    {
+      "name": "5-Class Package",
+      "description": "Flexible package valid for any 5 dance classes. Perfect for trying different courses or attending drop-in sessions.",
+      "credits": 5,
+      "price": 75.00,
+      "validity_days": 90,
+      "is_active": true
+    },
+    {
+      "name": "10-Class Package",
+      "description": "Best value! Attend any 10 dance classes. Ideal for regular students committed to improving their skills.",
+      "credits": 10,
+      "price": 135.00,
+      "validity_days": 180,
+      "is_active": true
+    },
+    {
+      "name": "20-Class Package",
+      "description": "Ultimate package for dedicated dancers. Valid for any 20 classes with extended validity period.",
+      "credits": 20,
+      "price": 250.00,
+      "validity_days": 365,
+      "is_active": true
+    },
+    {
+      "name": "Single Drop-In Class",
+      "description": "Try a single class with no commitment. Perfect for first-timers or visitors.",
+      "credits": 1,
+      "price": 18.00,
+      "validity_days": 30,
+      "is_active": true
+    },
+    {
+      "name": "Monthly Unlimited",
+      "description": "Unlimited access to all regular classes for one month. The ultimate package for dance enthusiasts!",
+      "credits": null,
+      "price": 200.00,
+      "validity_days": 30,
+      "is_active": true
+    }
+  ]
+}
+
+6. SAMPLE TEST DATA
+json{
+  "test_users": [
+    {
+      "email": "michel.adedokun@outlook.com",
+      "name": "Michel Adedokun",
+      "role": "owner",
+      "organization_id": "mikilele"
+    }
+  ],
+  "test_orders": [
+    {
+      "buyer_email": "michel.adedokun@outlook.com",
+      "buyer_name": "Michel Adedokun",
+      "event": "Mikilele SBK Soirée - January 2026",
+      "ticket_type": "General Admission",
+      "quantity": 1,
+      "total": 15.00,
+      "status": "completed"
+    },
+    {
+      "buyer_email": "michel.adedokun@outlook.com",
+      "buyer_name": "Michel Adedokun",
+      "event": "Ambiance Mikilele - January 2026",
+      "ticket_type": "General Admission",
+      "quantity": 2,
+      "total": 30.00,
+      "status": "completed"
+    }
+  ]
+}
+
+7. EVENT CATEGORIES
+json{
+  "categories": [
+    {
+      "name": "Social Dance",
+      "description": "Regular monthly social dancing events",
+      "icon": "🎵"
+    },
+    {
+      "name": "Special Event",
+      "description": "Special edition events with guest DJs and extended hours",
+      "icon": "✨"
+    },
+    {
+      "name": "Workshop",
+      "description": "Intensive learning sessions and skill-building workshops",
+      "icon": "📚"
+    },
+    {
+      "name": "Concert",
+      "description": "Live music performances and concerts",
+      "icon": "🎤"
+    }
+  ]
+}
+
+8. TYPICAL PRICING STRUCTURE
+json{
+  "pricing_strategy": {
+    "event_tickets": {
+      "early_bird": {
+        "discount_percentage": 20,
+        "description": "Limited quantity, ends 1 week before event"
+      },
+      "student_senior": {
+        "discount_percentage": 20,
+        "description": "Valid ID required at entry"
+      },
+      "general_admission": {
+        "base_price": 15.00,
+        "description": "Standard entry price"
+      }
+    },
+    "passes": {
+      "single_event": 15.00,
+      "five_events": 60.00,
+      "ten_events": 110.00,
+      "monthly_unlimited": 45.00
+    },
+    "classes": {
+      "drop_in": 18.00,
+      "per_class_in_course": 20.00,
+      "workshop_full_day": 75.00
+    },
+    "class_packages": {
+      "five_classes": 75.00,
+      "ten_classes": 135.00,
+      "twenty_classes": 250.00,
+      "monthly_unlimited": 200.00
+    }
+  }
+}

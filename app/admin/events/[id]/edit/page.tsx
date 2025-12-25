@@ -37,6 +37,8 @@ export default function EditEventPage() {
     price: 0,
     quantity_available: 50,
   });
+  const [uploading, setUploading] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
 
   const router = useRouter();
   const supabase = createClient();
@@ -45,6 +47,12 @@ export default function EditEventPage() {
     loadEvent();
     loadTicketTypes();
   }, [eventId]);
+
+  useEffect(() => {
+    if (event?.image_url) {
+      setImageUrl(event.image_url);
+    }
+  }, [event]);
 
   const loadEvent = async () => {
     try {
@@ -97,6 +105,7 @@ export default function EditEventPage() {
           country: event.country,
           capacity: event.capacity,
           status: event.status,
+          image_url: imageUrl || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', eventId);
@@ -108,6 +117,53 @@ export default function EditEventPage() {
       alert('Failed to update event');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${eventId}-${Date.now()}.${fileExt}`;
+      const filePath = `event-images/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('public')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('public')
+        .getPublicUrl(filePath);
+
+      setImageUrl(publicUrl);
+      setEvent({ ...event, image_url: publicUrl });
+    } catch (error: any) {
+      console.error('Error uploading image:', error);
+      alert(`Failed to upload image: ${error.message}`);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -233,6 +289,65 @@ export default function EditEventPage() {
                   value={event.description || ''}
                   onChange={(e) => setEvent({ ...event, description: e.target.value })}
                   rows={5}
+                />
+              </div>
+
+              {/* Image Upload Section */}
+              <div className="space-y-2">
+                <Label>Event Poster / Image</Label>
+                <div className="space-y-3">
+                  {imageUrl && (
+                    <div className="relative w-full h-48 rounded-lg overflow-hidden border">
+                      <img 
+                        src={imageUrl} 
+                        alt="Event poster" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploading}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <label htmlFor="image-upload">
+                        <Button
+                          type="button"
+                          onClick={() => document.getElementById('image-upload')?.click()}
+                          disabled={uploading}
+                          variant="outline"
+                          className="w-full"
+                        >
+                          {uploading ? 'Uploading...' : 'Upload Image'}
+                        </Button>
+                      </label>
+                    </div>
+                    
+                    <Input
+                      placeholder="Or paste image URL"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Upload an image or paste a URL. Max 5MB. Recommended: 1200x630px
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Input
+                  id="category"
+                  value={event.category || ''}
+                  onChange={(e) => setEvent({ ...event, category: e.target.value })}
+                  placeholder="e.g., Social Dance, Workshop, Concert"
                 />
               </div>
 
