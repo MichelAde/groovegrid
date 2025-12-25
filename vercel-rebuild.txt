@@ -1,0 +1,3 @@
+Trigger rebuild - fixing 404 errors
+Build timestamp: 2024-12-25
+
