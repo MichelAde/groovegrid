@@ -31,21 +31,9 @@ export default function LoginPage() {
       if (error) throw error;
 
       if (data.user) {
-        // Check if user is an organizer (has organization membership)
-        const { data: membership } = await supabase
-          .from('organization_members')
-          .select('id')
-          .eq('user_id', data.user.id)
-          .maybeSingle();
-
-        // Redirect based on user type
-        if (membership) {
-          // User is an organizer
-          router.push('/admin');
-        } else {
-          // User is a client
-          router.push('/portal');
-        }
+        // Always redirect to homepage after login
+        // Navigation will show appropriate options based on user type
+        router.push('/');
         router.refresh();
       }
     } catch (error: any) {

@@ -1,11 +1,33 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
 import { Calendar, Users, Ticket, Music } from 'lucide-react';
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  // Check if user is organizer
+  let isOrganizer = false;
+  if (user) {
+    const { data: membership } = await supabase
+      .from('organization_members')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    isOrganizer = !!membership;
+  }
+
+  const handleSignOut = async () => {
+    'use server';
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+    redirect('/');
+  };
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-white border-b sticky top-0 z-50">
@@ -32,18 +54,52 @@ export default function PublicLayout({
             </nav>
 
             <div className="flex items-center gap-3">
-              <Link
-                href="/login"
-                className="text-gray-700 hover:text-primary transition-colors font-medium"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/signup"
-                className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors font-medium"
-              >
-                Get Started
-              </Link>
+              {user ? (
+                <>
+                  {/* Show Portal for all logged-in users */}
+                  <Link
+                    href="/portal"
+                    className="text-gray-700 hover:text-primary transition-colors font-medium"
+                  >
+                    My Portal
+                  </Link>
+                  
+                  {/* Show Organizer Dashboard only for organizers */}
+                  {isOrganizer && (
+                    <Link
+                      href="/admin"
+                      className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors font-medium"
+                    >
+                      Organizer Dashboard
+                    </Link>
+                  )}
+                  
+                  {/* Show Sign Out */}
+                  <form action={handleSignOut}>
+                    <button
+                      type="submit"
+                      className="text-gray-700 hover:text-red-600 transition-colors font-medium"
+                    >
+                      Sign Out
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-gray-700 hover:text-primary transition-colors font-medium"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors font-medium"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

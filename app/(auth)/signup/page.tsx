@@ -93,14 +93,10 @@ export default function SignupPage() {
           });
 
         if (memberError) throw memberError;
-
-        // Success - redirect to admin dashboard
-        router.push('/admin');
-      } else {
-        // Client user - redirect to portal or events page
-        router.push('/portal');
       }
-      
+
+      // Success - redirect to homepage for all users
+      router.push('/');
       router.refresh();
     } catch (error: any) {
       setError(error.message || 'An error occurred during signup');

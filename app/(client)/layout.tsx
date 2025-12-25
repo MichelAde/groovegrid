@@ -1,20 +1,36 @@
-import { createServerClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Home, Ticket, CreditCard, GraduationCap, User, LogOut } from 'lucide-react';
+import { Home, Ticket, CreditCard, GraduationCap, User, LogOut, ArrowLeft, LayoutDashboard } from 'lucide-react';
 
 export default async function ClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createServerClient();
+  const supabase = await createClient();
   
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     redirect('/login');
   }
+
+  // Check if user is organizer
+  let isOrganizer = false;
+  const { data: membership } = await supabase
+    .from('organization_members')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  isOrganizer = !!membership;
+
+  const handleSignOut = async () => {
+    'use server';
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+    redirect('/');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -60,6 +76,26 @@ export default async function ClientLayout({
               </div>
             </div>
             <div className="flex items-center">
+              {/* Show Organizer Dashboard button if user is organizer */}
+              {isOrganizer && (
+                <Link
+                  href="/admin"
+                  className="inline-flex items-center px-4 py-2 mr-3 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-md"
+                >
+                  <LayoutDashboard className="w-4 h-4 mr-2" />
+                  Organizer Dashboard
+                </Link>
+              )}
+              
+              {/* Back to Home button */}
+              <Link
+                href="/"
+                className="inline-flex items-center px-4 py-2 mr-3 text-sm font-medium text-blue-600 hover:text-blue-700"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
+              </Link>
+              
               <div className="flex-shrink-0">
                 <Link
                   href="/portal/profile"
@@ -69,6 +105,17 @@ export default async function ClientLayout({
                   Profile
                 </Link>
               </div>
+              
+              {/* Sign Out button */}
+              <form action={handleSignOut} className="ml-2">
+                <button
+                  type="submit"
+                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-red-600"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </button>
+              </form>
             </div>
           </div>
         </div>

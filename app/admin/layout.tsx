@@ -13,6 +13,8 @@ import {
   Mail,
   LogOut,
   Settings,
+  Home,
+  ArrowLeft,
 } from 'lucide-react';
 
 export default async function AdminLayout({
@@ -49,6 +51,15 @@ export default async function AdminLayout({
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
+          {/* Back to Home button */}
+          <Link
+            href="/"
+            className="flex items-center gap-3 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors border border-blue-200 mb-4 font-medium"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Home</span>
+          </Link>
+
           <Link
             href="/admin"
             className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary rounded-md transition-colors"
