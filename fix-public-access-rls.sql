@@ -156,3 +156,4 @@ ORDER BY start_date;
 
 SELECT '🎉 RLS policies updated! Refresh http://localhost:3000/passes and /classes' AS result;
 
+

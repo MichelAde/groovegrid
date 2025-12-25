@@ -48,3 +48,4 @@ ORDER BY sort_order;
 
 SELECT '🎉 Done! Now refresh http://localhost:3000/admin/passes' AS next_step;
 
+

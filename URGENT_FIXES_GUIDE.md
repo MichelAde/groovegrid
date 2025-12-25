@@ -285,3 +285,4 @@ After completing actions above:
 **Status:** Build errors fixed, SQL ready to run  
 **Action:** Run `supabase-add-portal-tables.sql` NOW!
 
+
