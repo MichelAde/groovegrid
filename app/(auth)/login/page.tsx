@@ -31,7 +31,21 @@ export default function LoginPage() {
       if (error) throw error;
 
       if (data.user) {
-        router.push('/admin');
+        // Check if user is an organizer (has organization membership)
+        const { data: membership } = await supabase
+          .from('organization_members')
+          .select('id')
+          .eq('user_id', data.user.id)
+          .maybeSingle();
+
+        // Redirect based on user type
+        if (membership) {
+          // User is an organizer
+          router.push('/admin');
+        } else {
+          // User is a client
+          router.push('/portal');
+        }
         router.refresh();
       }
     } catch (error: any) {
@@ -49,7 +63,7 @@ export default function LoginPage() {
             Welcome to GrooveGrid
           </CardTitle>
           <CardDescription className="text-center">
-            Sign in to manage your events and dance school
+            Sign in to your account
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -10,12 +10,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function SignupPage() {
+  const [userType, setUserType] = useState<'client' | 'organizer'>('client');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
     organizationName: '',
     subdomain: '',
+    fullName: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -34,12 +36,21 @@ export default function SignupPage() {
       return;
     }
 
-    // Validate subdomain format
-    const subdomainRegex = /^[a-z0-9-]+$/;
-    if (!subdomainRegex.test(formData.subdomain)) {
-      setError('Subdomain can only contain lowercase letters, numbers, and hyphens');
-      setLoading(false);
-      return;
+    // Validate organizer-specific fields
+    if (userType === 'organizer') {
+      if (!formData.organizationName || !formData.subdomain) {
+        setError('Organization name and subdomain are required for organizers');
+        setLoading(false);
+        return;
+      }
+
+      // Validate subdomain format
+      const subdomainRegex = /^[a-z0-9-]+$/;
+      if (!subdomainRegex.test(formData.subdomain)) {
+        setError('Subdomain can only contain lowercase letters, numbers, and hyphens');
+        setLoading(false);
+        return;
+      }
     }
 
     try {
@@ -47,37 +58,49 @@ export default function SignupPage() {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName,
+            user_type: userType,
+          },
+        },
       });
 
       if (authError) throw authError;
       if (!authData.user) throw new Error('User creation failed');
 
-      // 2. Create organization
-      const { data: orgData, error: orgError } = await supabase
-        .from('organization')
-        .insert({
-          name: formData.organizationName,
-          subdomain: formData.subdomain,
-          email: formData.email,
-        })
-        .select()
-        .single();
+      if (userType === 'organizer') {
+        // 2. Create organization (organizers only)
+        const { data: orgData, error: orgError } = await supabase
+          .from('organization')
+          .insert({
+            name: formData.organizationName,
+            subdomain: formData.subdomain,
+            email: formData.email,
+          })
+          .select()
+          .single();
 
-      if (orgError) throw orgError;
+        if (orgError) throw orgError;
 
-      // 3. Add user as organization owner
-      const { error: memberError } = await supabase
-        .from('organization_members')
-        .insert({
-          organization_id: orgData.id,
-          user_id: authData.user.id,
-          role: 'owner',
-        });
+        // 3. Add user as organization owner
+        const { error: memberError } = await supabase
+          .from('organization_members')
+          .insert({
+            organization_id: orgData.id,
+            user_id: authData.user.id,
+            role: 'owner',
+          });
 
-      if (memberError) throw memberError;
+        if (memberError) throw memberError;
 
-      // Success - redirect to admin
-      router.push('/admin');
+        // Success - redirect to admin dashboard
+        router.push('/admin');
+      } else {
+        // Client user - redirect to portal or events page
+        router.push('/portal');
+      }
+      
       router.refresh();
     } catch (error: any) {
       setError(error.message || 'An error occurred during signup');
@@ -100,7 +123,9 @@ export default function SignupPage() {
             Create Your Account
           </CardTitle>
           <CardDescription className="text-center">
-            Start managing your dance events and school today
+            {userType === 'organizer' 
+              ? 'Start managing your dance events and school today'
+              : 'Join the community and discover amazing dance events'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -111,46 +136,54 @@ export default function SignupPage() {
               </div>
             )}
 
+            {/* User Type Selector */}
             <div className="space-y-2">
-              <Label htmlFor="organizationName">Organization Name</Label>
+              <Label>I am a...</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setUserType('client')}
+                  className={`p-4 border-2 rounded-lg text-left transition-all ${
+                    userType === 'client'
+                      ? 'border-purple-600 bg-purple-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="font-semibold mb-1">Dance Enthusiast</div>
+                  <div className="text-xs text-gray-600">
+                    Buy tickets, enroll in classes
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUserType('organizer')}
+                  className={`p-4 border-2 rounded-lg text-left transition-all ${
+                    userType === 'organizer'
+                      ? 'border-purple-600 bg-purple-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="font-semibold mb-1">Event Organizer</div>
+                  <div className="text-xs text-gray-600">
+                    Manage events, classes, sales
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name</Label>
               <Input
-                id="organizationName"
+                id="fullName"
                 type="text"
-                placeholder="Mikilele Events"
-                value={formData.organizationName}
-                onChange={(e) => {
-                  setFormData({ ...formData, organizationName: e.target.value });
-                  if (!formData.subdomain) {
-                    handleSubdomainChange(e.target.value);
-                  }
-                }}
+                placeholder="John Doe"
+                value={formData.fullName}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 required
                 disabled={loading}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="subdomain">Subdomain</Label>
-              <div className="flex items-center">
-                <Input
-                  id="subdomain"
-                  type="text"
-                  placeholder="mikilele"
-                  value={formData.subdomain}
-                  onChange={(e) => handleSubdomainChange(e.target.value)}
-                  required
-                  disabled={loading}
-                  className="rounded-r-none"
-                />
-                <span className="bg-gray-100 border border-l-0 border-input rounded-r-md px-3 py-2 text-sm text-gray-600">
-                  .groovegrid.com
-                </span>
-              </div>
-              <p className="text-xs text-gray-500">
-                Your unique URL for organizer dashboard and events
-              </p>
-            </div>
-            
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -163,6 +196,51 @@ export default function SignupPage() {
                 disabled={loading}
               />
             </div>
+
+            {/* Organization fields - only for organizers */}
+            {userType === 'organizer' && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="organizationName">Organization Name</Label>
+                  <Input
+                    id="organizationName"
+                    type="text"
+                    placeholder="Mikilele Events"
+                    value={formData.organizationName}
+                    onChange={(e) => {
+                      setFormData({ ...formData, organizationName: e.target.value });
+                      if (!formData.subdomain) {
+                        handleSubdomainChange(e.target.value);
+                      }
+                    }}
+                    required={userType === 'organizer'}
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="subdomain">Subdomain</Label>
+                  <div className="flex items-center">
+                    <Input
+                      id="subdomain"
+                      type="text"
+                      placeholder="mikilele"
+                      value={formData.subdomain}
+                      onChange={(e) => handleSubdomainChange(e.target.value)}
+                      required={userType === 'organizer'}
+                      disabled={loading}
+                      className="rounded-r-none"
+                    />
+                    <span className="bg-gray-100 border border-l-0 border-input rounded-r-md px-3 py-2 text-sm text-gray-600">
+                      .groovegrid.com
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Your unique URL for organizer dashboard and events
+                  </p>
+                </div>
+              </>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
