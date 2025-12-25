@@ -1,7 +1,12 @@
 -- Add missing tables for Portal functionality
+-- Safe version: Drops and recreates tables if they exist with errors
+
+-- Drop existing tables if they have errors
+DROP TABLE IF EXISTS user_passes CASCADE;
+DROP TABLE IF EXISTS course_enrollments CASCADE;
 
 -- Table: user_passes (for tracking user pass purchases)
-CREATE TABLE IF NOT EXISTS user_passes (
+CREATE TABLE user_passes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   pass_type_id UUID NOT NULL REFERENCES pass_types(id) ON DELETE CASCADE,
@@ -10,16 +15,16 @@ CREATE TABLE IF NOT EXISTS user_passes (
   
   credits_remaining INTEGER NOT NULL,
   credits_total INTEGER NOT NULL,
-  valid_from TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-  valid_until TIMESTAMP WITH TIME ZONE,
+  valid_from TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  valid_until TIMESTAMPTZ,
   is_active BOOLEAN DEFAULT TRUE,
   
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Table: course_enrollments (for tracking course enrollments)
-CREATE TABLE IF NOT EXISTS course_enrollments (
+CREATE TABLE course_enrollments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
@@ -27,12 +32,12 @@ CREATE TABLE IF NOT EXISTS course_enrollments (
   order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
   
   status VARCHAR(50) DEFAULT 'active',
-  enrollment_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  completion_date TIMESTAMP WITH TIME ZONE,
+  enrollment_date TIMESTAMPTZ DEFAULT NOW(),
+  completion_date TIMESTAMPTZ,
   progress INTEGER DEFAULT 0,
   
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Indexes for performance
