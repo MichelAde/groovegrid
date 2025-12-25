@@ -153,7 +153,7 @@ export default function BulkUploadPage() {
           let result;
           switch (type) {
             case 'events':
-              result = await supabase.from('events').insert(cleanItem);
+              result = await supabase.from('events').insert(cleanItem).select();
               
               // If event has ticket types, import them too
               if (!result.error && ticket_types && Array.isArray(ticket_types)) {
@@ -171,15 +171,15 @@ export default function BulkUploadPage() {
               break;
 
             case 'passes':
-              result = await supabase.from('pass_types').insert(cleanItem);
+              result = await supabase.from('pass_types').insert(cleanItem).select();
               break;
 
             case 'courses':
-              result = await supabase.from('courses').insert(cleanItem);
+              result = await supabase.from('courses').insert(cleanItem).select();
               break;
 
             case 'packages':
-              result = await supabase.from('class_packages').insert(cleanItem);
+              result = await supabase.from('class_packages').insert(cleanItem).select();
               break;
           }
 
