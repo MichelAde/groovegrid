@@ -92,7 +92,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         fees,
         tax,
         total,
-        status: 'confirmed',
+        status: 'completed',
       })
       .select()
       .single();
