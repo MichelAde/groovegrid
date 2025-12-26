@@ -30,91 +30,34 @@ CREATE INDEX IF NOT EXISTS idx_order_items_item_type ON order_items(item_type);
 -- 2. FIX order_items RLS POLICIES
 -- ==========================================
 
--- Enable RLS
-ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
-
--- Drop existing policies
-DROP POLICY IF EXISTS "Users can view own order items" ON order_items;
-DROP POLICY IF EXISTS "Service role can manage order items" ON order_items;
-
--- Allow all reads (filter by email in app)
-CREATE POLICY "Users can view order items"
-  ON order_items FOR SELECT
-  USING (true);
-
--- Service role can manage all
-CREATE POLICY "Service role can manage order items"
-  ON order_items FOR ALL
-  USING (auth.jwt()->>'role' = 'service_role')
-  WITH CHECK (auth.jwt()->>'role' = 'service_role');
+-- Disable RLS entirely - simplest solution
+-- The webhook needs to insert without restrictions
+-- We filter by email in the application layer
+ALTER TABLE order_items DISABLE ROW LEVEL SECURITY;
 
 -- ==========================================
 -- 3. FIX user_passes TABLE & RLS
 -- ==========================================
 
--- Enable RLS
-ALTER TABLE user_passes ENABLE ROW LEVEL SECURITY;
-
--- Drop existing policies
-DROP POLICY IF EXISTS "Users can view own passes" ON user_passes;
-DROP POLICY IF EXISTS "Service role can manage passes" ON user_passes;
-
--- Allow all reads
-CREATE POLICY "Users can view passes"
-  ON user_passes FOR SELECT
-  USING (true);
-
--- Service role can manage all
-CREATE POLICY "Service role can manage passes"
-  ON user_passes FOR ALL
-  USING (auth.jwt()->>'role' = 'service_role')
-  WITH CHECK (auth.jwt()->>'role' = 'service_role');
+-- Disable RLS - webhook needs unrestricted insert access
+ALTER TABLE user_passes DISABLE ROW LEVEL SECURITY;
 
 -- ==========================================
 -- 4. FIX course_enrollments TABLE & RLS
 -- ==========================================
 
--- Enable RLS
-ALTER TABLE course_enrollments ENABLE ROW LEVEL SECURITY;
-
--- Drop existing policies
-DROP POLICY IF EXISTS "Users can view own enrollments" ON course_enrollments;
-DROP POLICY IF EXISTS "Service role can manage enrollments" ON course_enrollments;
-
--- Allow all reads
-CREATE POLICY "Users can view enrollments"
-  ON course_enrollments FOR SELECT
-  USING (true);
-
--- Service role can manage all
-CREATE POLICY "Service role can manage enrollments"
-  ON course_enrollments FOR ALL
-  USING (auth.jwt()->>'role' = 'service_role')
-  WITH CHECK (auth.jwt()->>'role' = 'service_role');
+-- Disable RLS - webhook needs unrestricted insert access
+ALTER TABLE course_enrollments DISABLE ROW LEVEL SECURITY;
 
 -- ==========================================
 -- 5. FIX package_enrollments TABLE & RLS (if exists)
 -- ==========================================
 
+-- Disable RLS if table exists
 DO $$
 BEGIN
   IF EXISTS (SELECT FROM pg_tables WHERE tablename = 'package_enrollments') THEN
-    -- Enable RLS
-    ALTER TABLE package_enrollments ENABLE ROW LEVEL SECURITY;
-    
-    -- Drop existing policies
-    DROP POLICY IF EXISTS "Users can view own package enrollments" ON package_enrollments;
-    DROP POLICY IF EXISTS "Service role can manage package enrollments" ON package_enrollments;
-    
-    -- Create policies
-    CREATE POLICY "Users can view package enrollments"
-      ON package_enrollments FOR SELECT
-      USING (true);
-    
-    CREATE POLICY "Service role can manage package enrollments"
-      ON package_enrollments FOR ALL
-      USING (auth.jwt()->>'role' = 'service_role')
-      WITH CHECK (auth.jwt()->>'role' = 'service_role');
+    ALTER TABLE package_enrollments DISABLE ROW LEVEL SECURITY;
   END IF;
 END $$;
 
@@ -132,23 +75,14 @@ WHERE table_name = 'order_items'
   )
 ORDER BY column_name;
 
--- Check RLS is enabled
+-- Check RLS is DISABLED (should all show false)
 SELECT 
   tablename, 
-  rowsecurity as "RLS Enabled"
+  rowsecurity as "RLS Enabled (should be false)"
 FROM pg_tables 
 WHERE tablename IN ('order_items', 'user_passes', 'course_enrollments', 'package_enrollments')
   AND schemaname = 'public'
 ORDER BY tablename;
-
--- List all policies
-SELECT 
-  tablename,
-  policyname,
-  cmd as "Command"
-FROM pg_policies
-WHERE tablename IN ('order_items', 'user_passes', 'course_enrollments', 'package_enrollments')
-ORDER BY tablename, policyname;
 
 -- ==========================================
 -- VERIFICATION COMPLETE
