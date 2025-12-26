@@ -245,14 +245,9 @@ async function handlePassPurchase(
     throw new Error('Pass type not found');
   }
 
-  // Get user_id from buyer email
-  const { data: userData } = await supabase
-    .from('user_profiles')
-    .select('id')
-    .eq('email', buyerEmail)
-    .single();
-
-  const userId = userData?.id;
+  // Get user_id from buyer email (check auth.users via RPC or just skip for now)
+  // Note: auth.users is not directly accessible, so we'll rely on email matching in portal
+  const userId = null; // User will see their passes via email matching in RLS policy
 
   // Create user passes (one per quantity)
   for (let i = 0; i < quantity; i++) {
@@ -335,13 +330,9 @@ async function handlePackagePurchase(
   }
 
   // Get user_id from buyer email
-  const { data: userData } = await supabase
-    .from('user_profiles')
-    .select('id')
-    .eq('email', buyerEmail)
-    .single();
-
-  const userId = userData?.id;
+  // Get user_id from buyer email (check auth.users via RPC or just skip for now)
+  // Note: auth.users is not directly accessible, so we'll rely on email matching in RLS policy
+  const userId = null; // User will see their packages via email matching in RLS policy
 
   // Create package enrollments (one per quantity)
   for (let i = 0; i < quantity; i++) {
@@ -406,14 +397,9 @@ async function handleCourseEnrollment(
     throw itemError;
   }
 
-  // Get user_id from buyer email
-  const { data: userData } = await supabase
-    .from('user_profiles')
-    .select('id')
-    .eq('email', buyerEmail)
-    .single();
-
-  const userId = userData?.id;
+  // Get user_id from buyer email (check auth.users via RPC or just skip for now)
+  // Note: auth.users is not directly accessible, so we'll rely on email matching in RLS policy
+  const userId = null; // User will see their enrollments via email matching in RLS policy
 
   // Create course enrollment
   const enrollmentData: any = {

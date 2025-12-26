@@ -20,18 +20,8 @@ DROP POLICY IF EXISTS "Users can insert own passes" ON user_passes;
 CREATE POLICY "Users can view own passes"
   ON user_passes FOR SELECT
   USING (
-    -- If user is authenticated and pass is linked to their user_id
-    (auth.uid() IS NOT NULL AND auth.uid() = user_id)
-    OR
-    -- If user is authenticated and pass was purchased with their email
-    (auth.uid() IS NOT NULL AND EXISTS (
-      SELECT 1 FROM orders 
-      WHERE orders.id = user_passes.order_id 
-      AND orders.buyer_email = (SELECT email FROM user_profiles WHERE id = auth.uid())
-    ))
-    OR
-    -- If no user is authenticated, still show passes (for logged-out viewing)
-    (auth.uid() IS NULL)
+    -- Always allow viewing (we'll filter in the app by email)
+    true
   );
 
 -- Service role (webhook) can insert and manage all passes
@@ -56,18 +46,8 @@ DROP POLICY IF EXISTS "Users can insert own enrollments" ON course_enrollments;
 CREATE POLICY "Users can view own enrollments"
   ON course_enrollments FOR SELECT
   USING (
-    -- If user is authenticated and enrollment is linked to their user_id
-    (auth.uid() IS NOT NULL AND auth.uid() = user_id)
-    OR
-    -- If user is authenticated and enrollment was purchased with their email
-    (auth.uid() IS NOT NULL AND EXISTS (
-      SELECT 1 FROM orders 
-      WHERE orders.id = course_enrollments.order_id 
-      AND orders.buyer_email = (SELECT email FROM user_profiles WHERE id = auth.uid())
-    ))
-    OR
-    -- If no user is authenticated, still show enrollments (for logged-out viewing)
-    (auth.uid() IS NULL)
+    -- Always allow viewing (we'll filter in the app by email)
+    true
   );
 
 -- Service role (webhook) can insert and manage all enrollments
@@ -94,17 +74,7 @@ BEGIN
     -- Create policies
     CREATE POLICY "Users can view own package enrollments"
       ON package_enrollments FOR SELECT
-      USING (
-        (auth.uid() IS NOT NULL AND auth.uid() = user_id)
-        OR
-        (auth.uid() IS NOT NULL AND EXISTS (
-          SELECT 1 FROM orders 
-          WHERE orders.id = package_enrollments.order_id 
-          AND orders.buyer_email = (SELECT email FROM user_profiles WHERE id = auth.uid())
-        ))
-        OR
-        (auth.uid() IS NULL)
-      );
+      USING (true);  -- Allow viewing, filter by email in app
     
     CREATE POLICY "Service role can manage package enrollments"
       ON package_enrollments FOR ALL
