@@ -63,7 +63,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.log('Metadata:', metadata);
 
     const purchaseType = metadata.purchase_type;
-    const eventId = metadata.event_id;
+    // Convert string 'null' back to actual null for database
+    const eventId = metadata.event_id && metadata.event_id !== 'null' ? metadata.event_id : null;
     const organizationId = metadata.organization_id;
     const buyerEmail = metadata.buyer_email || session.customer_email;
     const buyerName = metadata.buyer_name;
@@ -108,9 +109,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     if (purchaseType === 'ticket_purchase' && items) {
       await handleTicketPurchase(order.id, items, supabase);
     } else if (purchaseType === 'pass_purchase') {
-      await handlePassPurchase(order.id, metadata, supabase);
+      await handlePassPurchase(order.id, items, metadata, buyerEmail || '', supabase);
     } else if (purchaseType === 'package_purchase') {
-      await handlePackagePurchase(order.id, metadata, supabase);
+      await handlePackagePurchase(order.id, items, metadata, buyerEmail || '', supabase);
+    } else if (purchaseType === 'course_enrollment') {
+      await handleCourseEnrollment(order.id, items, metadata, buyerEmail || '', supabase);
     }
 
     // Send confirmation email
@@ -196,14 +199,22 @@ async function handleTicketPurchase(
 
 async function handlePassPurchase(
   orderId: string,
+  items: any[],
   metadata: any,
+  buyerEmail: string,
   supabase: any
 ) {
-  console.log('Processing pass purchase');
+  console.log('Processing pass purchase:', items);
 
-  const passTypeId = metadata.pass_type_id;
-  const quantity = parseInt(metadata.quantity || '1');
-  const price = parseFloat(metadata.price);
+  // Get the first item (should only be one pass type per purchase)
+  const item = items[0];
+  if (!item || !item.pass_type_id) {
+    throw new Error('No pass type found in items');
+  }
+
+  const passTypeId = item.pass_type_id;
+  const quantity = item.quantity || 1;
+  const price = item.price;
 
   // Create order item
   const { error: itemError } = await supabase
@@ -223,60 +234,84 @@ async function handlePassPurchase(
   }
 
   // Get pass type details
-  const { data: passType } = await supabase
+  const { data: passType, error: passTypeError } = await supabase
     .from('pass_types')
     .select('credits, validity_days')
     .eq('id', passTypeId)
     .single();
 
-  if (!passType) {
+  if (passTypeError || !passType) {
+    console.error('Error fetching pass type:', passTypeError);
     throw new Error('Pass type not found');
   }
 
-  // Create customer passes
+  // Get user_id from buyer email
+  const { data: userData } = await supabase
+    .from('user_profiles')
+    .select('id')
+    .eq('email', buyerEmail)
+    .single();
+
+  const userId = userData?.id;
+
+  // Create user passes (one per quantity)
   for (let i = 0; i < quantity; i++) {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + passType.validity_days);
 
+    const passData: any = {
+      order_id: orderId,
+      pass_type_id: passTypeId,
+      credits_total: passType.credits,
+      credits_remaining: passType.credits,
+      expiry_date: expiryDate.toISOString(),
+      is_active: true,
+    };
+
+    // Add user_id if we found the user
+    if (userId) {
+      passData.user_id = userId;
+    }
+
     const { error: passError } = await supabase
-      .from('customer_passes')
-      .insert({
-        order_id: orderId,
-        pass_type_id: passTypeId,
-        buyer_email: metadata.buyer_email,
-        credits_total: passType.credits,
-        credits_remaining: passType.credits,
-        expiry_date: expiryDate.toISOString(),
-        status: 'active',
-      });
+      .from('user_passes')
+      .insert(passData);
 
     if (passError) {
-      console.error('Error creating customer pass:', passError);
+      console.error('Error creating user pass:', passError);
       throw passError;
     }
   }
 
-  console.log(`Created ${quantity} passes`);
+  console.log(`Created ${quantity} passes for ${buyerEmail}`);
 }
 
 async function handlePackagePurchase(
   orderId: string,
+  items: any[],
   metadata: any,
+  buyerEmail: string,
   supabase: any
 ) {
-  console.log('Processing package purchase');
+  console.log('Processing package purchase:', items);
 
-  const packageId = metadata.package_id;
-  const quantity = parseInt(metadata.quantity || '1');
-  const price = parseFloat(metadata.price);
+  // Get the first item (should only be one package per purchase)
+  const item = items[0];
+  if (!item || !item.package_id) {
+    throw new Error('No package found in items');
+  }
+
+  const packageId = item.package_id;
+  const quantity = item.quantity || 1;
+  const price = item.price;
 
   // Create order item
   const { error: itemError } = await supabase
     .from('order_items')
     .insert({
       order_id: orderId,
-      item_type: 'class_package',
-      class_package_id: packageId,
+      item_type: 'package',
+      package_id: packageId,
       quantity,
       price_per_item: price,
       subtotal: price * quantity,
@@ -287,7 +322,122 @@ async function handlePackagePurchase(
     throw itemError;
   }
 
-  console.log(`Created ${quantity} class packages`);
+  // Get package details
+  const { data: packageData, error: packageError } = await supabase
+    .from('class_packages')
+    .select('credits')
+    .eq('id', packageId)
+    .single();
+
+  if (packageError || !packageData) {
+    console.error('Error fetching package:', packageError);
+    throw new Error('Package not found');
+  }
+
+  // Get user_id from buyer email
+  const { data: userData } = await supabase
+    .from('user_profiles')
+    .select('id')
+    .eq('email', buyerEmail)
+    .single();
+
+  const userId = userData?.id;
+
+  // Create package enrollments (one per quantity)
+  for (let i = 0; i < quantity; i++) {
+    const enrollmentData: any = {
+      order_id: orderId,
+      package_id: packageId,
+      credits_total: packageData.credits,
+      credits_remaining: packageData.credits,
+      status: 'active',
+    };
+
+    // Add user_id if we found the user
+    if (userId) {
+      enrollmentData.user_id = userId;
+    }
+
+    const { error: enrollError } = await supabase
+      .from('package_enrollments')
+      .insert(enrollmentData);
+
+    if (enrollError) {
+      console.error('Error creating package enrollment:', enrollError);
+      throw enrollError;
+    }
+  }
+
+  console.log(`Created ${quantity} package enrollments for ${buyerEmail}`);
+}
+
+async function handleCourseEnrollment(
+  orderId: string,
+  items: any[],
+  metadata: any,
+  buyerEmail: string,
+  supabase: any
+) {
+  console.log('Processing course enrollment:', items);
+
+  // Get the first item (should only be one course per purchase)
+  const item = items[0];
+  if (!item || !item.course_id) {
+    throw new Error('No course found in items');
+  }
+
+  const courseId = item.course_id;
+  const price = item.price;
+
+  // Create order item
+  const { error: itemError } = await supabase
+    .from('order_items')
+    .insert({
+      order_id: orderId,
+      item_type: 'course',
+      course_id: courseId,
+      quantity: 1,
+      price_per_item: price,
+      subtotal: price,
+    });
+
+  if (itemError) {
+    console.error('Error creating order item:', itemError);
+    throw itemError;
+  }
+
+  // Get user_id from buyer email
+  const { data: userData } = await supabase
+    .from('user_profiles')
+    .select('id')
+    .eq('email', buyerEmail)
+    .single();
+
+  const userId = userData?.id;
+
+  // Create course enrollment
+  const enrollmentData: any = {
+    order_id: orderId,
+    course_id: courseId,
+    status: 'active',
+    enrolled_at: new Date().toISOString(),
+  };
+
+  // Add user_id if we found the user
+  if (userId) {
+    enrollmentData.user_id = userId;
+  }
+
+  const { error: enrollError } = await supabase
+    .from('course_enrollments')
+    .insert(enrollmentData);
+
+  if (enrollError) {
+    console.error('Error creating course enrollment:', enrollError);
+    throw enrollError;
+  }
+
+  console.log(`Created course enrollment for ${buyerEmail}`);
 }
 
 async function sendConfirmationEmail(

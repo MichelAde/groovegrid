@@ -142,16 +142,16 @@ export async function POST(request: NextRequest) {
       customer_email: buyer_email,
       metadata: {
         purchase_type,
-        event_id: event_id || '',
+        event_id: event_id || 'null', // Stripe metadata doesn't support null, use string 'null'
         organization_id: organization?.id || event?.organization_id || '',
         buyer_email,
         buyer_name,
-        pass_type_id: body.pass_type_id || '',
-        package_id: body.package_id || '',
+        pass_type_id: body.pass_type_id || 'null',
+        package_id: body.package_id || 'null',
         items: JSON.stringify(items.map((item: any) => ({
-          ticket_type_id: item.ticket_type_id,
-          pass_type_id: item.pass_type_id,
-          package_id: item.package_id,
+          ticket_type_id: item.ticket_type_id || null,
+          pass_type_id: item.pass_type_id || null,
+          package_id: item.package_id || null,
           quantity: item.quantity,
           price: item.price,
           name: item.name,

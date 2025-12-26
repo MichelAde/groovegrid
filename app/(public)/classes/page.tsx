@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { GraduationCap, Calendar, Users, Clock, DollarSign } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
@@ -30,6 +33,9 @@ export default function ClassesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [enrollmentData, setEnrollmentData] = useState({ name: '', email: '' });
+  const [enrolling, setEnrolling] = useState(false);
 
   const supabase = createClient();
 
@@ -59,6 +65,42 @@ export default function ClassesPage() {
     if (filter === 'all') return true;
     return course.level.toLowerCase() === filter;
   });
+
+  const handleEnrollClick = (course: Course) => {
+    setSelectedCourse(course);
+  };
+
+  const handleEnrollment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCourse) return;
+
+    setEnrolling(true);
+    try {
+      const response = await fetch('/api/courses/enroll', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          course_id: selectedCourse.id,
+          buyer_email: enrollmentData.email,
+          buyer_name: enrollmentData.name,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.url;
+      } else {
+        alert('Error: ' + (data.error || 'Failed to start enrollment'));
+      }
+    } catch (error) {
+      console.error('Enrollment error:', error);
+      alert('Failed to start enrollment process');
+    } finally {
+      setEnrolling(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -179,7 +221,7 @@ export default function ClassesPage() {
                           {formatCurrency(course.price)}
                         </span>
                       </div>
-                      <Button>
+                      <Button onClick={() => handleEnrollClick(course)}>
                         Enroll Now
                       </Button>
                     </div>
@@ -225,6 +267,81 @@ export default function ClassesPage() {
           </div>
         )}
       </div>
+
+      {/* Enrollment Dialog */}
+      <Dialog open={!!selectedCourse} onOpenChange={(open) => !open && setSelectedCourse(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enroll in {selectedCourse?.title}</DialogTitle>
+            <DialogDescription>
+              Complete your enrollment to secure your spot in this {selectedCourse?.duration_weeks}-week course.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleEnrollment} className="space-y-4">
+            <div>
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                type="text"
+                required
+                value={enrollmentData.name}
+                onChange={(e) => setEnrollmentData({ ...enrollmentData, name: e.target.value })}
+                placeholder="Enter your full name"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                required
+                value={enrollmentData.email}
+                onChange={(e) => setEnrollmentData({ ...enrollmentData, email: e.target.value })}
+                placeholder="Enter your email"
+              />
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="flex justify-between text-sm mb-2">
+                <span>Course Fee</span>
+                <span>{formatCurrency(selectedCourse?.price || 0)}</span>
+              </div>
+              <div className="flex justify-between text-sm mb-2">
+                <span>Platform Fee (2%)</span>
+                <span>{formatCurrency((selectedCourse?.price || 0) * 0.02)}</span>
+              </div>
+              <div className="flex justify-between text-sm mb-2">
+                <span>HST (13%)</span>
+                <span>{formatCurrency((selectedCourse?.price || 0) * 1.02 * 0.13)}</span>
+              </div>
+              <div className="border-t pt-2 flex justify-between font-bold">
+                <span>Total</span>
+                <span>{formatCurrency((selectedCourse?.price || 0) * 1.02 * 1.13)}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setSelectedCourse(null)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={enrolling}
+                className="flex-1"
+              >
+                {enrolling ? 'Processing...' : 'Proceed to Payment'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
