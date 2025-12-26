@@ -46,14 +46,28 @@ export async function POST(request: NextRequest) {
       const passOrPackageId = body.pass_type_id || body.package_id;
       const table = purchase_type === 'pass_purchase' ? 'pass_types' : 'class_packages';
       
-      const { data: itemData } = await supabase
+      const { data: itemData, error: itemError } = await supabase
         .from(table)
-        .select('*, organization(name)')
+        .select('*, organization(id, name)')
         .eq('id', passOrPackageId)
         .single();
 
-      if (itemData) {
+      if (itemError) {
+        console.error('Error fetching item:', itemError);
+        return NextResponse.json(
+          { error: `${purchase_type === 'pass_purchase' ? 'Pass' : 'Package'} not found` },
+          { status: 404 }
+        );
+      }
+
+      if (itemData && itemData.organization) {
         organization = itemData.organization;
+      } else {
+        console.error('No organization found for item:', itemData);
+        return NextResponse.json(
+          { error: 'Organization not found for this item' },
+          { status: 404 }
+        );
       }
     }
 
@@ -143,7 +157,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         purchase_type,
         event_id: event_id || 'null', // Stripe metadata doesn't support null, use string 'null'
-        organization_id: organization?.id || event?.organization_id || '',
+        organization_id: organization?.id || event?.organization_id || 'null',  // Fixed: was ''
         buyer_email,
         buyer_name,
         pass_type_id: body.pass_type_id || 'null',
