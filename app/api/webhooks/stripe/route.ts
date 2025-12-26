@@ -63,9 +63,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.log('Metadata:', metadata);
 
     const purchaseType = metadata.purchase_type;
-    // Convert string 'null' back to actual null for database
-    const eventId = metadata.event_id && metadata.event_id !== 'null' ? metadata.event_id : null;
-    const organizationId = metadata.organization_id && metadata.organization_id !== 'null' ? metadata.organization_id : null;
+    // Convert string 'null' and empty string back to actual null for database
+    const eventId = metadata.event_id && metadata.event_id !== 'null' && metadata.event_id !== '' ? metadata.event_id : null;
+    const organizationId = metadata.organization_id && metadata.organization_id !== 'null' && metadata.organization_id !== '' ? metadata.organization_id : null;
     const buyerEmail = metadata.buyer_email || session.customer_email;
     const buyerName = metadata.buyer_name;
     const items = JSON.parse(metadata.items);

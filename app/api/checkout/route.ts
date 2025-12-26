@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         purchase_type,
         event_id: event_id || 'null', // Stripe metadata doesn't support null, use string 'null'
-        organization_id: organization?.id || event?.organization_id || 'null',  // Fixed: was ''
+        organization_id: (organization?.id || event?.organization_id) ? (organization?.id || event?.organization_id) : 'null',  // Ensure not empty string
         buyer_email,
         buyer_name,
         pass_type_id: body.pass_type_id || 'null',
