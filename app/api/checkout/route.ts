@@ -22,18 +22,39 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
-    // Get event details
-    const { data: event } = await supabase
-      .from('events')
-      .select('*, organization(name)')
-      .eq('id', event_id)
-      .single();
+    // Get event or organization details based on purchase type
+    let event = null;
+    let organization = null;
 
-    if (!event) {
-      return NextResponse.json(
-        { error: 'Event not found' },
-        { status: 404 }
-      );
+    if (purchase_type === 'ticket_purchase' && event_id) {
+      const { data: eventData } = await supabase
+        .from('events')
+        .select('*, organization(name)')
+        .eq('id', event_id)
+        .single();
+
+      if (!eventData) {
+        return NextResponse.json(
+          { error: 'Event not found' },
+          { status: 404 }
+        );
+      }
+      event = eventData;
+      organization = eventData.organization;
+    } else if (purchase_type === 'pass_purchase' || purchase_type === 'package_purchase') {
+      // For passes/packages, get organization from the item
+      const passOrPackageId = body.pass_type_id || body.package_id;
+      const table = purchase_type === 'pass_purchase' ? 'pass_types' : 'class_packages';
+      
+      const { data: itemData } = await supabase
+        .from(table)
+        .select('*, organization(name)')
+        .eq('id', passOrPackageId)
+        .single();
+
+      if (itemData) {
+        organization = itemData.organization;
+      }
     }
 
     // Calculate totals
@@ -52,18 +73,32 @@ export async function POST(request: NextRequest) {
     const total = subtotal + fees + tax;
 
     // Create line items for Stripe
-    const line_items = items.map((item: any) => ({
-      price_data: {
-        currency: 'cad',
-        product_data: {
-          name: `${event.title} - ${item.name}`,
-          description: `Event: ${event.title}`,
-          images: event.image_url ? [event.image_url] : [],
+    const line_items = items.map((item: any) => {
+      let productName = item.name;
+      let productDescription = '';
+      
+      if (purchase_type === 'ticket_purchase' && event) {
+        productName = `${event.title} - ${item.name}`;
+        productDescription = `Event: ${event.title}`;
+      } else if (purchase_type === 'pass_purchase') {
+        productDescription = `Multi-event pass`;
+      } else if (purchase_type === 'package_purchase') {
+        productDescription = `Class package`;
+      }
+
+      return {
+        price_data: {
+          currency: 'cad',
+          product_data: {
+            name: productName,
+            description: productDescription,
+            images: event?.image_url ? [event.image_url] : [],
+          },
+          unit_amount: Math.round(item.price * 100), // Convert to cents
         },
-        unit_amount: Math.round(item.price * 100), // Convert to cents
-      },
-      quantity: item.quantity,
-    }));
+        quantity: item.quantity,
+      };
+    });
 
     // Add platform fee as a line item
     if (fees > 0) {
@@ -101,16 +136,22 @@ export async function POST(request: NextRequest) {
       payment_method_types: ['card'],
       line_items,
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/events/${event_id}`,
+      cancel_url: event_id 
+        ? `${process.env.NEXT_PUBLIC_BASE_URL}/events/${event_id}`
+        : `${process.env.NEXT_PUBLIC_BASE_URL}/passes`,
       customer_email: buyer_email,
       metadata: {
         purchase_type,
-        event_id,
-        organization_id: event.organization_id,
+        event_id: event_id || '',
+        organization_id: organization?.id || event?.organization_id || '',
         buyer_email,
         buyer_name,
+        pass_type_id: body.pass_type_id || '',
+        package_id: body.package_id || '',
         items: JSON.stringify(items.map((item: any) => ({
           ticket_type_id: item.ticket_type_id,
+          pass_type_id: item.pass_type_id,
+          package_id: item.package_id,
           quantity: item.quantity,
           price: item.price,
           name: item.name,
