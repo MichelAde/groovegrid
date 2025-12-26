@@ -43,11 +43,12 @@ ALTER TABLE order_items DISABLE ROW LEVEL SECURITY;
 ALTER TABLE user_passes DISABLE ROW LEVEL SECURITY;
 
 -- ==========================================
--- 4. FIX course_enrollments TABLE & RLS
+-- 4. FIX enrollments TABLE & RLS
 -- ==========================================
 
 -- Disable RLS - webhook needs unrestricted insert access
-ALTER TABLE course_enrollments DISABLE ROW LEVEL SECURITY;
+-- Note: Table is called 'enrollments' not 'course_enrollments'
+ALTER TABLE enrollments DISABLE ROW LEVEL SECURITY;
 
 -- ==========================================
 -- 5. FIX package_enrollments TABLE & RLS (if exists)
@@ -80,7 +81,7 @@ SELECT
   tablename, 
   rowsecurity as "RLS Enabled (should be false)"
 FROM pg_tables 
-WHERE tablename IN ('order_items', 'user_passes', 'course_enrollments', 'package_enrollments')
+WHERE tablename IN ('order_items', 'user_passes', 'enrollments', 'package_enrollments')
   AND schemaname = 'public'
 ORDER BY tablename;
 

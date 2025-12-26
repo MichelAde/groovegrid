@@ -236,7 +236,7 @@ async function handlePassPurchase(
   // Get pass type details
   const { data: passType, error: passTypeError } = await supabase
     .from('pass_types')
-    .select('credits, validity_days')
+    .select('credits_total, validity_days')  // Fixed: was 'credits'
     .eq('id', passTypeId)
     .single();
 
@@ -257,8 +257,8 @@ async function handlePassPurchase(
     const passData: any = {
       order_id: orderId,
       pass_type_id: passTypeId,
-      credits_total: passType.credits,
-      credits_remaining: passType.credits,
+      credits_total: passType.credits_total,  // Fixed: was passType.credits
+      credits_remaining: passType.credits_total,  // Fixed: was passType.credits
       expiry_date: expiryDate.toISOString(),
       is_active: true,
     };
@@ -406,7 +406,7 @@ async function handleCourseEnrollment(
     order_id: orderId,
     course_id: courseId,
     status: 'active',
-    enrolled_at: new Date().toISOString(),
+    enrollment_date: new Date().toISOString(),  // Fixed: was enrolled_at
   };
 
   // Add user_id if we found the user
@@ -415,7 +415,7 @@ async function handleCourseEnrollment(
   }
 
   const { error: enrollError } = await supabase
-    .from('course_enrollments')
+    .from('enrollments')  // Fixed: was course_enrollments
     .insert(enrollmentData);
 
   if (enrollError) {

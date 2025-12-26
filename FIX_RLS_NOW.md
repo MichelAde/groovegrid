@@ -47,14 +47,14 @@ The webhook runs with the Supabase service role, but the RLS policies are preven
 -- Disable RLS on all affected tables
 ALTER TABLE order_items DISABLE ROW LEVEL SECURITY;
 ALTER TABLE user_passes DISABLE ROW LEVEL SECURITY;
-ALTER TABLE course_enrollments DISABLE ROW LEVEL SECURITY;
+ALTER TABLE enrollments DISABLE ROW LEVEL SECURITY;
 
 -- Verify RLS is disabled (all should show "false")
 SELECT 
   tablename, 
   rowsecurity as "RLS Enabled"
 FROM pg_tables 
-WHERE tablename IN ('order_items', 'user_passes', 'course_enrollments')
+WHERE tablename IN ('order_items', 'user_passes', 'enrollments')
   AND schemaname = 'public';
 ```
 
@@ -62,11 +62,11 @@ WHERE tablename IN ('order_items', 'user_passes', 'course_enrollments')
 
 **Expected Result:**
 ```
-tablename           | RLS Enabled
---------------------+------------
-order_items         | false
-user_passes         | false
-course_enrollments  | false
+tablename      | RLS Enabled
+---------------+------------
+order_items    | false
+user_passes    | false
+enrollments    | false
 ```
 
 ---
@@ -184,7 +184,7 @@ It does the same thing but with more comments.
 ```sql
 ALTER TABLE order_items DISABLE ROW LEVEL SECURITY;
 ALTER TABLE user_passes DISABLE ROW LEVEL SECURITY;
-ALTER TABLE course_enrollments DISABLE ROW LEVEL SECURITY;
+ALTER TABLE enrollments DISABLE ROW LEVEL SECURITY;
 ```
 
 **That's it! Test immediately after running this.**
