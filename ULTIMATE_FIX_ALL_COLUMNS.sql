@@ -36,6 +36,9 @@ ALTER TABLE user_passes ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
 ALTER TABLE user_passes ADD COLUMN IF NOT EXISTS credits_total INTEGER;
 ALTER TABLE user_passes ADD COLUMN IF NOT EXISTS credits_remaining INTEGER;
 
+-- CRITICAL: Allow NULL for user_id (webhook cannot populate this)
+ALTER TABLE user_passes ALTER COLUMN user_id DROP NOT NULL;
+
 -- ==========================================
 -- 3. FIX enrollments TABLE
 -- ==========================================
@@ -48,6 +51,9 @@ ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.us
 ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS course_id UUID REFERENCES courses(id);
 ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS enrollment_date TIMESTAMPTZ DEFAULT NOW();
 ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'active';
+
+-- CRITICAL: Allow NULL for user_id (webhook cannot populate this)
+ALTER TABLE enrollments ALTER COLUMN user_id DROP NOT NULL;
 
 -- ==========================================
 -- 4. DISABLE RLS ON ALL TABLES
