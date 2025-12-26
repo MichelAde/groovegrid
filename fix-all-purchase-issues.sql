@@ -63,7 +63,26 @@ BEGIN
 END $$;
 
 -- ==========================================
--- 6. VERIFY ALL CHANGES
+-- 6. ADD MISSING COLUMNS TO CORE TABLES
+-- ==========================================
+
+-- user_passes - ensure all columns exist
+ALTER TABLE user_passes ADD COLUMN IF NOT EXISTS order_id UUID REFERENCES orders(id);
+ALTER TABLE user_passes ADD COLUMN IF NOT EXISTS expiry_date TIMESTAMPTZ;
+ALTER TABLE user_passes ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+
+-- enrollments - ensure order_id exists
+ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS order_id UUID REFERENCES orders(id);
+
+-- ==========================================
+-- 7. REFRESH POSTGREST SCHEMA CACHE
+-- ==========================================
+
+-- Force Supabase to reload the schema
+NOTIFY pgrst, 'reload schema';
+
+-- ==========================================
+-- 8. VERIFY ALL CHANGES
 -- ==========================================
 
 -- Check order_items columns
