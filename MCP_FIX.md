@@ -96,3 +96,4 @@ This will use the `postgres` MCP server to query your database directly!
 The postgres server IS your Supabase connection - it's perfect! 🎉
 
 
+
