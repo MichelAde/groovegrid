@@ -107,3 +107,4 @@ Just let me know and I'll build it! For now, let's get the working servers up an
 **Bottom line:** Use Postgres + Resend for now. Both are proven and working. Skip Stripe until we build a custom server for it.
 
 
+
