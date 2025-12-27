@@ -21,16 +21,21 @@ export default function MyPassesPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data } = await supabase
+      // Query passes - RLS policy will automatically filter to show only passes
+      // where user_id matches OR order buyer_email matches
+      const { data, error } = await supabase
         .from('user_passes')
         .select(`
           *,
           pass_types(*)
         `)
-        .eq('user_id', user.id)
         .eq('is_active', true)
         .order('purchase_date', { ascending: false });
 
+      if (error) {
+        console.error('Error loading passes:', error);
+      }
+      
       setPasses(data || []);
     } catch (error) {
       console.error('Error loading passes:', error);
@@ -104,4 +109,3 @@ export default function MyPassesPage() {
     </div>
   );
 }
-

@@ -21,16 +21,21 @@ export default function MyCoursesPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data } = await supabase
-        .from('course_enrollments')
+      // Query enrollments - RLS policy will automatically filter to show only enrollments
+      // where user_id matches OR order buyer_email matches
+      const { data, error } = await supabase
+        .from('enrollments')
         .select(`
           *,
           courses(*)
         `)
-        .eq('user_id', user.id)
         .eq('status', 'active')
         .order('enrollment_date', { ascending: false });
 
+      if (error) {
+        console.error('Error loading enrollments:', error);
+      }
+      
       setEnrollments(data || []);
     } catch (error) {
       console.error('Error loading enrollments:', error);
@@ -109,4 +114,3 @@ export default function MyCoursesPage() {
     </div>
   );
 }
-
